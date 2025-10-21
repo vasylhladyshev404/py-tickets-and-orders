@@ -7,8 +7,12 @@ from django.contrib.auth import get_user_model
 
 
 @transaction.atomic
-def create_order(tickets: list[dict], username: str, date: Optional[str] = None) -> Order:
-    user = User.objects.get(username=username)
+def create_order(
+    tickets: list[dict],
+    username: str,
+    date: Optional[str] = None
+) -> Order:
+    user = get_user_model().objects.get(username=username)
 
     dt = None
     if date:
