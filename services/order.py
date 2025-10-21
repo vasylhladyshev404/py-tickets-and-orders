@@ -1,34 +1,38 @@
-from db.models import Ticket, Order
+from db.models import Ticket, Order, MovieSession
 from typing import Optional
 from django.db import transaction
 from django.db.models import QuerySet
+from django.utils.dateparse import parse_datetime
 
+
+@transaction.atomic
 def create_order(
     tickets: list[dict],
     username: str,
     date: Optional[str] = None
 ) -> Order:
-    with transaction.atomic():
-        user = User.objects.get(username=username)
+    user = get_user_model().objects.get(username=username)
 
-        order = Order.objects.create(user=user)
+    dt = None
+    if date:
+        dt = parse_datetime(date)
+        if dt is None:
+            raise ValueError(f"Invalid date format: {date}")
 
-        if date:
-            dt = parse_datetime(date)
-            if dt is None:
-                raise ValueError(f"Invalid date format: {date}")
-            order.created_at = dt
-            order.save(update_fields=["created_at"])
+    order = Order.objects.create(
+        user=user,
+        created_at=dt if dt else None
+    )
 
-        for ticket in tickets:
-            Ticket.objects.create(
-                movie_session=MovieSession.objects.get(id=ticket["movie_session"]),
-                order=order,
-                row=ticket["row"],
-                seat=ticket["seat"],
-            )
+    for ticket in tickets:
+        Ticket.objects.create(
+            movie_session=MovieSession.objects.get(id=ticket["movie_session"]),
+            order=order,
+            row=ticket["row"],
+            seat=ticket["seat"],
+        )
 
-        return order
+    return order
 
 
 def get_orders(
