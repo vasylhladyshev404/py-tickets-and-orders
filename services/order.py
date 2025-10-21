@@ -14,23 +14,21 @@ def create_order(
 ) -> Order:
     user = get_user_model().objects.get(username=username)
 
-    dt = None
     if date:
         dt = parse_datetime(date)
         if dt is None:
             raise ValueError(f"Invalid date format: {date}")
-
-    order = Order.objects.create(
-        user=user,
-        created_at=dt if dt else None
-    )
+        order = Order(user=user, created_at=dt)
+        order.save(force_insert=True)
+    else:
+        order = Order.objects.create(user=user)
 
     Ticket.objects.bulk_create([
         Ticket(
             movie_session=MovieSession.objects.get(id=t["movie_session"]),
             order=order,
             row=t["row"],
-            seat=t["seat"]
+            seat=t["seat"],
         )
         for t in tickets
     ])
