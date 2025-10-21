@@ -7,12 +7,8 @@ from django.contrib.auth import get_user_model
 
 
 @transaction.atomic
-def create_order(
-    tickets: list[dict],
-    username: str,
-    date: Optional[str] = None
-) -> Order:
-    user = get_user_model().objects.get(username=username)
+def create_order(tickets: list[dict], username: str, date: Optional[str] = None) -> Order:
+    user = User.objects.get(username=username)
 
     dt = None
     if date:
@@ -25,13 +21,15 @@ def create_order(
         created_at=dt if dt else None
     )
 
-    for ticket in tickets:
-        Ticket.objects.create(
-            movie_session=MovieSession.objects.get(id=ticket["movie_session"]),
+    Ticket.objects.bulk_create([
+        Ticket(
+            movie_session=MovieSession.objects.get(id=t["movie_session"]),
             order=order,
-            row=ticket["row"],
-            seat=ticket["seat"],
+            row=t["row"],
+            seat=t["seat"]
         )
+        for t in tickets
+    ])
 
     return order
 

@@ -37,7 +37,7 @@ def update_user(
     last_name: Optional[str] = None,
 
 ) -> User:
-    user = User.get_user(user_id)
+    user = get_user(user_id)
 
     if username is not None:
         user.username = username

@@ -73,7 +73,7 @@ class Order(models.Model):
     )
 
     def __str__(self) -> str:
-        return f"Order: {self.created_at:%Y-%m-%d %H:%M:%S}"
+        return f"{self.created_at:%Y-%m-%d %H:%M:%S}"
 
     class Meta:
         ordering = ["-created_at"]
@@ -95,7 +95,7 @@ class Ticket(models.Model):
 
     def __str__(self) -> str:
         return (
-            f"Ticket: {self.movie_session.movie.title} "
+            f"{self.movie_session.movie.title} "
             f"{self.movie_session.show_time} "
             f"(row: {self.row}, seat: {self.seat})"
         )
