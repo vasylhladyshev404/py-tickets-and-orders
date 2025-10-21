@@ -30,8 +30,9 @@ class Movie(models.Model):
 
     class Meta:
         indexes = [
-            Index(fields=["title"])
+            Index(fields=["title"]),
         ]
+
 
 class CinemaHall(models.Model):
     name = models.CharField(max_length=255)
@@ -49,34 +50,45 @@ class CinemaHall(models.Model):
 class MovieSession(models.Model):
     show_time = models.DateTimeField()
     cinema_hall = models.ForeignKey(
-        to=CinemaHall, on_delete=models.CASCADE, related_name="movie_sessions"
+        to=CinemaHall,
+        on_delete=models.CASCADE,
+        related_name="movie_sessions",
     )
     movie = models.ForeignKey(
-        to=Movie, on_delete=models.CASCADE, related_name="movie_sessions"
+        to=Movie,
+        on_delete=models.CASCADE,
+        related_name="movie_sessions",
     )
 
     def __str__(self) -> str:
-        return f"{self.movie.title} {str(self.show_time)}"
+        return f"{self.movie.title} {self.show_time}"
 
 
 class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(
-        "User", on_delete=models.CASCADE, related_name="orders"
+        "User",
+        on_delete=models.CASCADE,
+        related_name="orders",
     )
 
     def __str__(self) -> str:
-        return f"Order: {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
+        return f"Order: {self.created_at:%Y-%m-%d %H:%M:%S}"
 
     class Meta:
         ordering = ["-created_at"]
 
+
 class Ticket(models.Model):
     movie_session = models.ForeignKey(
-        to=MovieSession, on_delete=models.CASCADE, related_name="tickets"
+        to=MovieSession,
+        on_delete=models.CASCADE,
+        related_name="tickets",
     )
     order = models.ForeignKey(
-        to=Order, on_delete=models.CASCADE, related_name="tickets"
+        to=Order,
+        on_delete=models.CASCADE,
+        related_name="tickets",
     )
     row = models.IntegerField()
     seat = models.IntegerField()
@@ -93,15 +105,17 @@ class Ticket(models.Model):
 
         if self.row <= 0 or self.row > hall.rows:
             raise ValidationError({
-                "row": ( 
-                f"row number must be in available range: (1, rows): (1, {hall.rows})"
-            )
+                "row": (
+                    f"row number must be in available range: "
+                    f"(1, rows): (1, {hall.rows})"
+                )
             })
 
         if self.seat <= 0 or self.seat > hall.seats_in_row:
             raise ValidationError({
                 "seat": (
-                    f"seat number must be in available range: (1, seats_in_row): (1, {hall.seats_in_row})"
+                    f"seat number must be in available range: "
+                    f"(1, seats_in_row): (1, {hall.seats_in_row})"
                 )
             })
 
@@ -113,10 +127,10 @@ class Ticket(models.Model):
         constraints = [
             UniqueConstraint(
                 fields=["row", "seat", "movie_session"],
-                name="unique_row_seat_movie_session"
-
+                name="unique_row_seat_movie_session",
             )
         ]
+
 
 class User(AbstractUser):
     email = models.EmailField()
