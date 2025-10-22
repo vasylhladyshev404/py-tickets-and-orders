@@ -18,16 +18,10 @@ def create_order(
         dt = parse_datetime(date)
         if dt is None:
             raise ValueError(f"Invalid date format: {date}")
+        if timezone.is_naive(dt):
+            dt = timezone.make_aware(dt, timezone.get_current_timezone())
 
-        order = Order(user=user, created_at=dt)
-
-        field = Order._meta.get_field("created_at")
-        old_auto_now_add = field.auto_now_add
-        field.auto_now_add = False
-
-        order.save(force_insert=True)
-
-        field.auto_now_add = old_auto_now_add
+        order = Order.objects.create(user=user, created_at=dt)
     else:
         order = Order.objects.create(user=user)
 
