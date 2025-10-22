@@ -4,8 +4,8 @@ from db.models import MovieSession
 
 
 def create_movie_session(
-    movie_show_time: str, 
-    movie_id: int, 
+    movie_show_time: str,
+    movie_id: int,
     cinema_hall_id: int
 ) -> MovieSession:
     return MovieSession.objects.create(
