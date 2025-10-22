@@ -22,7 +22,9 @@ def create_order(
         if timezone.is_naive(dt):
             dt = timezone.make_aware(dt, timezone.get_current_timezone())
 
-        order = Order.objects.create(user=user, created_at=dt)
+        order = Order.objects.create(user=user)
+        Order.objects.filter(pk=order.pk).update(created_at=dt)
+        order.refresh_from_db()
     else:
         order = Order.objects.create(user=user)
 
